@@ -1,0 +1,256 @@
+@if (!isAuthRoute()) {
+  <nav class="navbar" [class.navbar--admin-mobile-hidden]="isAdminRoute()">
+    <div class="navbar__inner">
+      <a class="navbar__logo" routerLink="/inicio">
+        <img src="assets/logo.svg" alt="" aria-hidden="true" class="navbar__logo-img" />
+        <span>GigTogether</span>
+      </a>
+
+      <div class="navbar__links" *ngIf="(isAuthenticated$ | async) && !(isAdmin$ | async)">
+        <a routerLink="/inicio" routerLinkActive="navbar__link--active">Inicio</a>
+        <a routerLink="/conciertos" routerLinkActive="navbar__link--active">Conciertos</a>
+        <a routerLink="/mis-grupos" routerLinkActive="navbar__link--active">Mis grupos</a>
+      </div>
+
+      <div class="navbar__links" *ngIf="!(isAuthenticated$ | async)">
+        <a routerLink="/conciertos" routerLinkActive="navbar__link--active">Conciertos</a>
+        <a routerLink="/login">Entrar</a>
+      </div>
+
+      <!-- CAMPANA DE NOTIFICACIONES (solo usuarios autenticados no admin) -->
+      @if (showNotifBell()) {
+        <div class="navbar__notif" [class.navbar__notif--open]="notifPanelOpen">
+          <button class="navbar__notif-btn"
+                  (click)="toggleNotifPanel()"
+                  [attr.aria-label]="'Notificaciones'"
+                  [attr.aria-expanded]="notifPanelOpen"
+                  type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            @if (unreadCount() > 0) {
+              <span class="navbar__notif-badge" aria-hidden="true">{{ unreadCount() }}</span>
+            }
+          </button>
+
+          @if (notifPanelOpen) {
+            <div class="navbar__notif-panel" role="dialog" aria-label="Notificaciones">
+              <div class="navbar__notif-header">
+                <span class="navbar__notif-title">Notificaciones</span>
+                <div class="navbar__notif-actions">
+                  @if (unreadCount() > 0) {
+                    <button class="navbar__notif-action-btn" (click)="markAllAsRead()" type="button">
+                      Marcar leídas
+                    </button>
+                  }
+                  @if (notifications().length > 0) {
+                    <button class="navbar__notif-action-btn navbar__notif-action-btn--danger"
+                            (click)="deleteAllNotifications()" type="button">
+                      Borrar todo
+                    </button>
+                  }
+                </div>
+              </div>
+
+              @if (notifications().length === 0) {
+                <p class="navbar__notif-empty">No tienes notificaciones</p>
+              } @else {
+                <ul class="navbar__notif-list" role="list">
+                  @for (notif of notifications(); track notif.id) {
+                    <li class="navbar__notif-item"
+                        [class.navbar__notif-item--unread]="!notif.isRead"
+                        [class.navbar__notif-item--expulsion]="notif.type === 'EXPULSION'"
+                        (click)="markAsRead(notif)"
+                        role="listitem">
+                      @if (notif.type === 'EXPULSION') {
+                        <span class="navbar__notif-icon navbar__notif-icon--warn" aria-hidden="true">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                               stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                          </svg>
+                        </span>
+                      }
+                      @if (notif.type === 'GROUP_MESSAGE') {
+                        <span class="navbar__notif-icon" aria-hidden="true">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                               stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                          </svg>
+                        </span>
+                      }
+                      <div class="navbar__notif-body">
+                        <p class="navbar__notif-msg">{{ notif.message }}</p>
+                        <span class="navbar__notif-time">
+                          {{ notif.createdAt | date:'d MMM, HH:mm':'':'es-ES' }}
+                        </span>
+                      </div>
+                      @if (!notif.isRead) {
+                        <span class="navbar__notif-dot" aria-hidden="true"></span>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- CAMPANA ADMIN (solo administradores) -->
+      @if (showAdminBell()) {
+        <div class="navbar__notif" [class.navbar__notif--open]="adminPanelOpen">
+          <button class="navbar__notif-btn navbar__notif-btn--admin"
+                  (click)="toggleAdminPanel()"
+                  aria-label="Notificaciones de administración"
+                  [attr.aria-expanded]="adminPanelOpen"
+                  type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+              <line x1="4" y1="22" x2="4" y2="15"/>
+            </svg>
+            @if (adminUnreadCount() > 0) {
+              <span class="navbar__notif-badge" aria-hidden="true">{{ adminUnreadCount() }}</span>
+            }
+          </button>
+
+          @if (adminPanelOpen) {
+            <div class="navbar__notif-panel" role="dialog" aria-label="Notificaciones de administración">
+              <div class="navbar__notif-header">
+                <span class="navbar__notif-title">Actividad reciente</span>
+                <div class="navbar__notif-actions">
+                  @if (adminUnreadCount() > 0) {
+                    <button class="navbar__notif-action-btn" (click)="adminMarkAllAsRead()" type="button">
+                      Marcar leídas
+                    </button>
+                  }
+                  @if (adminNotifications().length > 0) {
+                    <button class="navbar__notif-action-btn navbar__notif-action-btn--danger"
+                            (click)="adminClearAll()" type="button">
+                      Borrar todo
+                    </button>
+                  }
+                </div>
+              </div>
+
+              @if (adminNotifications().length === 0) {
+                <p class="navbar__notif-empty">No hay actividad nueva</p>
+              } @else {
+                <ul class="navbar__notif-list" role="list">
+                  @for (item of adminNotifications(); track item.id) {
+                    <li class="navbar__notif-item"
+                        [class.navbar__notif-item--unread]="!item.isRead"
+                        [class.navbar__notif-item--report]="item.type === 'REPORT'"
+                        [class.navbar__notif-item--block]="item.type === 'BLOCK'"
+                        role="listitem">
+                      <span class="navbar__notif-icon"
+                            [class.navbar__notif-icon--report]="item.type === 'REPORT'"
+                            [class.navbar__notif-icon--block]="item.type === 'BLOCK'"
+                            aria-hidden="true">
+                        @if (item.type === 'REPORT') {
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                               stroke-linejoin="round">
+                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                            <line x1="4" y1="22" x2="4" y2="15"/>
+                          </svg>
+                        } @else {
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                               stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                          </svg>
+                        }
+                      </span>
+                      <div class="navbar__notif-body">
+                        <p class="navbar__notif-msg">{{ item.message }}</p>
+                        <span class="navbar__notif-time">
+                          {{ item.createdAt | date:'d MMM, HH:mm':'':'es-ES' }}
+                        </span>
+                      </div>
+                      @if (!item.isRead) {
+                        <span class="navbar__notif-dot" aria-hidden="true"></span>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (currentUser$ | async; as user) {
+        <div class="navbar__user" [class.navbar__user--open]="dropdownOpen">
+          <button class="navbar__avatar"
+                  (click)="toggleDropdown()"
+                  [attr.aria-expanded]="dropdownOpen"
+                  aria-haspopup="true"
+                  [attr.aria-label]="'Menú de ' + user.alias">
+            @if (user.profilePicture) {
+              <img [src]="user.profilePicture" alt="" class="navbar__avatar-img" aria-hidden="true" />
+            } @else {
+              {{ user.alias | slice:0:2 | uppercase }}
+            }
+          </button>
+
+          @if (dropdownOpen) {
+            <div class="navbar__dropdown" role="menu">
+              <div class="navbar__dropdown-header">
+                <span class="navbar__dropdown-alias">{{ user.alias }}</span>
+                <span class="navbar__dropdown-email">{{ user.email }}</span>
+              </div>
+              <hr class="navbar__dropdown-divider" />
+              <a class="navbar__dropdown-item"
+                 role="menuitem"
+                 routerLink="/mi-perfil/perfil"
+                 (click)="dropdownOpen = false">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="8" r="4"/>
+                  <path d="M20 21a8 8 0 1 0-16 0"/>
+                </svg>
+                Mi perfil
+              </a>
+              <a class="navbar__dropdown-item"
+                 role="menuitem"
+                 routerLink="/mi-perfil/cuenta"
+                 (click)="dropdownOpen = false">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                Mi cuenta
+              </a>
+              <hr class="navbar__dropdown-divider" />
+              <button class="navbar__dropdown-item navbar__dropdown-item--danger"
+                      role="menuitem"
+                      (click)="onLogout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Cerrar sesión
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </nav>
+}

@@ -1,0 +1,39 @@
+@use '@angular/material' as mat;
+@use 'styles/variables' as *;
+@use 'styles/reset';
+
+@include mat.core();
+
+$app-primary: mat.define-palette(mat.$indigo-palette);
+$app-accent:  mat.define-palette(mat.$blue-palette);
+$app-theme:   mat.define-light-theme((
+  color: (primary: $app-primary, accent: $app-accent)
+));
+
+@include mat.all-component-themes($app-theme);
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html { font-family: 'Inter', sans-serif; }
+.mat-typography { font-family: 'Inter', sans-serif !important; }
+
+.snack-success .mdc-snackbar__surface { background: #16A34A !important; color: #FFFFFF !important; }
+.snack-error   .mdc-snackbar__surface { background: #DC2626 !important; color: #FFFFFF !important; }
+
+.snack-success,
+.snack-error {
+  .mat-mdc-snack-bar-action { color: #000000 !important; }
+}
+
+
+@media (max-width: 767px) {
+  .cdk-overlay-pane.admin-dialog-panel {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 100dvh !important;
+
+    .mat-mdc-dialog-container {
+      border-radius: 0 !important;
+    }
+  }
+}

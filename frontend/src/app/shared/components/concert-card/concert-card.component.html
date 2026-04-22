@@ -1,0 +1,46 @@
+<article
+  class="concert-card"
+  [class.concert-card--grid]="layout === 'grid'"
+  [class.concert-card--list]="layout === 'list'"
+  (click)="navigateToConcert()"
+  (keydown.enter)="navigateToConcert()"
+  tabindex="0"
+  [attr.aria-label]="concert.artistName + ', ' + formattedDate()">
+
+  <!-- Layout GRID: imagen arriba, info abajo -->
+  @if (layout === 'grid') {
+    <div class="concert-card__image-wrapper">
+      <img
+        [src]="concert.imageUrl || ''"
+        [alt]="concert.artistName"
+        class="concert-card__image"
+        loading="lazy"
+        (error)="$any($event.target).style.display='none'" />
+    </div>
+    <div class="concert-card__body">
+      <p class="concert-card__artist">{{ concert.artistName }}</p>
+      <p class="concert-card__meta">{{ concert.venue.name }} · {{ formattedDate() }}</p>
+      @if (concert.genre) {
+        <span class="concert-card__tag">{{ concert.genre }}</span>
+      }
+    </div>
+  }
+
+  <!-- Layout LIST: imagen izquierda, info derecha -->
+  @if (layout === 'list') {
+    <img
+      [src]="concert.imageUrl || ''"
+      [alt]="concert.artistName"
+      class="concert-card__thumb"
+      loading="lazy"
+      (error)="$any($event.target).style.display='none'" />
+    <div class="concert-card__body">
+      <p class="concert-card__artist">{{ concert.artistName }}</p>
+      <p class="concert-card__meta">{{ concert.venue.name }} · {{ formattedDate() }}</p>
+      @if (concert.genre) {
+        <span class="concert-card__tag">{{ concert.genre }}</span>
+      }
+    </div>
+  }
+
+</article>

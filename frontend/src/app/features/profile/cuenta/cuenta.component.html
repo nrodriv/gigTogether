@@ -1,0 +1,133 @@
+<div class="cuenta">
+
+  <div class="cuenta__header">
+    <h2 class="cuenta__title">Mi cuenta</h2>
+    <p class="cuenta__subtitle">Gestiona tus credenciales de acceso</p>
+  </div>
+
+  <!-- Info de usuario -->
+  <div class="cuenta__user-info">
+    <div class="cuenta__avatar">{{ currentAlias().slice(0, 2).toUpperCase() }}</div>
+    <div>
+      <p class="cuenta__alias">{{ currentAlias() }}</p>
+      <p class="cuenta__email-display">{{ currentEmail() }}</p>
+    </div>
+  </div>
+
+  <!-- Cambiar email -->
+  <section class="cuenta__section">
+    <h3 class="cuenta__section-title">Cambiar email</h3>
+
+    <form [formGroup]="emailForm" (ngSubmit)="onSaveEmail()" novalidate class="cuenta__form">
+      <div class="form-field">
+        <label for="email" class="form-field__label">Nuevo email</label>
+        <input id="email" type="email" formControlName="email"
+               class="form-field__input"
+               [class.form-field__input--error]="showError(emailForm, 'email')"
+               autocomplete="email" />
+        @if (showError(emailForm, 'email')) {
+          <span class="form-field__error" role="alert">Introduce un email válido</span>
+        }
+      </div>
+
+      <div class="cuenta__form-footer">
+        <button type="submit" class="btn-primary" [disabled]="savingEmail()">
+          @if (savingEmail()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            Actualizar email
+          }
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Cambiar contraseña -->
+  <section class="cuenta__section">
+    <h3 class="cuenta__section-title">Cambiar contraseña</h3>
+
+    <form [formGroup]="passwordForm" (ngSubmit)="onSavePassword()" novalidate class="cuenta__form">
+      <div class="form-field">
+        <label for="currentPassword" class="form-field__label">Contraseña actual</label>
+        <input id="currentPassword" type="password" formControlName="currentPassword"
+               class="form-field__input"
+               [class.form-field__input--error]="showError(passwordForm, 'currentPassword')"
+               autocomplete="current-password" />
+        @if (showError(passwordForm, 'currentPassword')) {
+          <span class="form-field__error" role="alert">Introduce tu contraseña actual</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="newPassword" class="form-field__label">Nueva contraseña</label>
+        <input id="newPassword" type="password" formControlName="newPassword"
+               class="form-field__input"
+               [class.form-field__input--error]="showError(passwordForm, 'newPassword')"
+               autocomplete="new-password" />
+        @if (showError(passwordForm, 'newPassword')) {
+          <span class="form-field__error" role="alert">
+            @if (passwordForm.get('newPassword')?.hasError('required')) { La contraseña nueva es obligatoria }
+            @else if (passwordForm.get('newPassword')?.hasError('minlength')) { Mínimo 8 caracteres }
+          </span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="confirmPassword" class="form-field__label">Confirmar contraseña</label>
+        <input id="confirmPassword" type="password" formControlName="confirmPassword"
+               class="form-field__input"
+               [class.form-field__input--error]="
+                 (passwordForm.get('confirmPassword')?.touched && passwordForm.get('confirmPassword')?.invalid)
+                 || (passwordForm.touched && passwordForm.hasError('passwordsMismatch'))"
+               autocomplete="new-password" />
+        @if (passwordForm.get('confirmPassword')?.touched && passwordForm.hasError('passwordsMismatch')) {
+          <span class="form-field__error" role="alert">Las contraseñas no coinciden</span>
+        }
+      </div>
+
+      <div class="cuenta__form-footer">
+        <button type="submit" class="btn-primary" [disabled]="savingPassword()">
+          @if (savingPassword()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            Cambiar contraseña
+          }
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Zona de peligro -->
+  <section class="cuenta__section cuenta__section--danger">
+    <h3 class="cuenta__section-title cuenta__section-title--danger">Zona de peligro</h3>
+    <p class="cuenta__danger-text">
+      Una vez que elimines tu cuenta, se borrarán todos tus datos de forma permanente.
+      Esta acción no se puede deshacer.
+    </p>
+
+    @if (!showDeleteConfirm()) {
+      <button type="button" class="btn-danger-outline" (click)="showDeleteConfirm.set(true)">
+        Eliminar mi cuenta
+      </button>
+    } @else {
+      <div class="delete-confirm">
+        <p class="delete-confirm__text">
+          ¿Estás seguro? Esta acción es irreversible y perderás todos tus datos.
+        </p>
+        <div class="delete-confirm__actions">
+          <button type="button" class="btn-ghost" (click)="showDeleteConfirm.set(false)">
+            Cancelar
+          </button>
+          <button type="button" class="btn-danger" [disabled]="deletingAccount()" (click)="onDeleteAccount()">
+            @if (deletingAccount()) {
+              <mat-spinner diameter="18" />
+            } @else {
+              Sí, eliminar cuenta
+            }
+          </button>
+        </div>
+      </div>
+    }
+  </section>
+
+</div>

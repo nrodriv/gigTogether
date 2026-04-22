@@ -1,0 +1,256 @@
+<div class="groups-page">
+  <div class="groups-page__inner">
+
+    <a routerLink="/inicio" class="groups-page__back">← Volver a inicio</a>
+    <h1 class="groups-page__title">Mis grupos</h1>
+
+    @if (isLoading) {
+      <div class="groups-page__loading">
+        <mat-spinner diameter="40" />
+      </div>
+
+    } @else if (groups.length === 0) {
+      <div class="groups-page__empty">
+        <mat-icon class="groups-page__empty-icon" aria-hidden="true">queue_music</mat-icon>
+        <p class="groups-page__empty-title">Todavía no perteneces a ningún grupo</p>
+        <p class="groups-page__empty-sub">
+          Busca un concierto y pulsa "Voy solo/a" para que te asignemos grupo
+        </p>
+        <a routerLink="/conciertos" class="btn-primary groups-page__empty-cta">
+          Ver conciertos
+        </a>
+      </div>
+
+    } @else {
+
+      <!-- PRÓXIMOS CONCIERTOS -->
+      @if (upcomingGroups.length > 0) {
+        <section class="groups-section">
+          <h2 class="groups-section__title">Próximos conciertos</h2>
+          <div class="groups-page__list">
+            @for (group of upcomingGroups; track group.id) {
+              <div class="group-card">
+
+                <div class="group-card__concert">
+                  <img [src]="group.concert.imageUrl || 'https://picsum.photos/seed/default/200/200'"
+                       [alt]="group.concert.artistName"
+                       class="group-card__concert-img" />
+                  <div class="group-card__concert-info">
+                    <p class="group-card__concert-artist">{{ group.concert.artistName }}</p>
+                    <p class="group-card__concert-meta">
+                      {{ group.concert.venue.name }} ·
+                      {{ group.concert.date | date:'EEE d MMM':'':'es-ES' }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="group-card__preview">
+                  <p class="group-card__preview-title">Tu grupo de previa</p>
+                  <p class="group-card__preview-meta">
+                    Franja: {{ arrivalWindowTimeRange(group.arrivalWindow, group.concert.doorsOpenTime) }} ·
+                    {{ group.members.length }}/5 miembros
+                  </p>
+                </div>
+
+                <div class="group-card__members">
+                  @for (member of group.members; track member.id) {
+                    <div class="member-item"
+                         [class.member-item--own]="isMe(member.userId)">
+                      <div class="member-item__avatar"
+                           [class.member-item__avatar--own]="isMe(member.userId)"
+                           [class.member-item__avatar--clickable]="!isMe(member.userId)"
+                           [attr.role]="!isMe(member.userId) ? 'button' : null"
+                           [attr.tabindex]="!isMe(member.userId) ? 0 : null"
+                           [attr.aria-label]="!isMe(member.userId) ? ('Ver perfil de ' + member.alias) : null"
+                           (click)="!isMe(member.userId) && openMemberProfile($event, member)"
+                           (keydown.enter)="!isMe(member.userId) && openMemberProfile($event, member)">
+                        @if (loadingProfileId === member.userId) {
+                          <mat-spinner diameter="16" />
+                        } @else if (member.profilePicture) {
+                          <img [src]="member.profilePicture" [alt]="member.alias" class="member-item__avatar-img" />
+                        } @else {
+                          {{ member.alias | slice:0:2 | uppercase }}
+                        }
+                        @if (isMe(member.userId)) {
+                          <span class="member-item__you-badge">TÚ</span>
+                        }
+                      </div>
+                      <div class="member-item__info">
+                        <p class="member-item__alias"
+                           [class.member-item__alias--link]="!isMe(member.userId)"
+                           (click)="!isMe(member.userId) && openMemberProfile($event, member)">
+                          {{ member.alias }}
+                        </p>
+                        @if (member.activityType) {
+                          <p class="member-item__activity">{{ activityLabel(member.activityType) }}</p>
+                        }
+                      </div>
+                      @if (!isMe(member.userId)) {
+                        <div class="member-item__actions" (click)="stopPropagation($event)">
+                          <button class="member-item__block-btn"
+                                  [attr.aria-label]="'Bloquear a ' + member.alias"
+                                  (click)="toggleMenu($event, member.userId)">
+                            <mat-icon>person_off</mat-icon>
+                          </button>
+                          @if (openMenuUserId === member.userId) {
+                            <div class="member-item__menu-panel">
+                              <p class="member-item__menu-title">Bloquear a {{ member.alias }}</p>
+                              <p class="member-item__menu-desc">
+                                Ya no podréis coincidir en el mismo grupo.
+                              </p>
+                              <div class="member-item__menu-field">
+                                <label class="member-item__menu-label" [for]="'reason-' + member.userId">
+                                  Motivo <span class="member-item__menu-optional">(opcional · visible para moderadores)</span>
+                                </label>
+                                <textarea [id]="'reason-' + member.userId"
+                                          class="member-item__menu-textarea"
+                                          [(ngModel)]="blockReasonMap[member.userId]"
+                                          placeholder="¿Por qué bloqueas a este usuario?"
+                                          rows="2"
+                                          maxlength="300"></textarea>
+                              </div>
+                              <div class="member-item__menu-btns">
+                                <button class="member-item__menu-cancel" (click)="cancelMenu($event)">
+                                  Cancelar
+                                </button>
+                                <button class="member-item__menu-confirm"
+                                        [disabled]="blockingUserId === member.userId"
+                                        (click)="confirmBlock($event, member, group.id)">
+                                  @if (blockingUserId === member.userId) { Bloqueando… }
+                                  @else { Bloquear }
+                                </button>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div class="group-card__progress">
+                  <div class="group-card__progress-bar">
+                    <div class="group-card__progress-fill"
+                         [style.width.%]="(group.members.length / 5) * 100">
+                    </div>
+                  </div>
+                  <span class="group-card__progress-label">{{ group.members.length }}/5 miembros</span>
+                </div>
+
+                <div class="group-card__actions">
+                  @if (group.chatUnlocked) {
+                    <button class="btn-chat"
+                            (click)="openChat(group)"
+                            [attr.aria-label]="'Abrir chat del grupo de ' + group.concert.artistName">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                           stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                      </svg>
+                      Chat del grupo
+                      @if (chatUnreadFor(group.id) > 0) {
+                        <span class="btn-chat__badge">{{ chatUnreadFor(group.id) }}</span>
+                      }
+                    </button>
+                  } @else {
+                    <div class="group-card__chat-locked">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                           stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                      Chat disponible con 3 miembros
+                      <span class="group-card__chat-locked-count">{{ group.members.length }}/3</span>
+                    </div>
+                  }
+                  <p class="group-card__privacy-note">
+                    El chat es privado y solo visible para miembros del grupo
+                  </p>
+                  <button class="btn-leave"
+                          (click)="leaveGroup(group.id)"
+                          [attr.aria-label]="'Abandonar grupo de ' + group.concert.artistName">
+                    Abandonar grupo
+                  </button>
+                </div>
+
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- HISTORIAL DE CONCIERTOS -->
+      @if (hasPastGroups) {
+        <section class="groups-section">
+          <h2 class="groups-section__title">Historial de conciertos</h2>
+
+          <div class="history-filter">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="search"
+                   class="history-filter__input"
+                   placeholder="Filtrar por artista o sala…"
+                   [(ngModel)]="pastFilter"
+                   aria-label="Filtrar historial de conciertos" />
+          </div>
+
+          @if (pastGroups.length === 0) {
+            <p class="history-empty">No hay resultados para "{{ pastFilter }}"</p>
+          } @else {
+            <div class="history-list">
+              @for (group of pastGroups; track group.id) {
+                <div class="history-card">
+                  <img [src]="group.concert.imageUrl || 'https://picsum.photos/seed/default/80/80'"
+                       [alt]="group.concert.artistName"
+                       class="history-card__img" />
+                  <div class="history-card__info">
+                    <p class="history-card__artist">{{ group.concert.artistName }}</p>
+                    <p class="history-card__meta">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                           stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                      </svg>
+                      {{ group.concert.venue.name }}
+                    </p>
+                    <p class="history-card__meta">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                           stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                      {{ group.concert.date | date:'EEEE d MMMM yyyy':'':'es-ES' }}
+                    </p>
+                  </div>
+                  <span class="history-card__badge">Asistido</span>
+                </div>
+              }
+            </div>
+          }
+
+        </section>
+      }
+
+    }
+
+  </div>
+</div>
+
+@if (viewedProfile) {
+  <app-profile-card [profile]="viewedProfile" (close)="closeProfile()" />
+}
+
+@if (openChatGroup && currentUserId) {
+  <app-group-chat
+    [group]="openChatGroup"
+    [currentUserId]="currentUserId"
+    (close)="closeChat()" />
+}

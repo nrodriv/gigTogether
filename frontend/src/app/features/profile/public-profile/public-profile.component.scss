@@ -1,0 +1,395 @@
+@use '../../../../styles/variables' as *;
+
+.pub-profile {
+  padding: 28px 24px 32px;
+
+  &__header {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid $border-card;
+  }
+
+  &__title {
+    font-size: 20px;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0 0 4px;
+  }
+
+  &__subtitle {
+    font-size: 14px;
+    color: $text-secondary;
+    margin: 0;
+  }
+
+  &__section {
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid $border-card;
+
+    &:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  &__section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0 0 4px;
+  }
+
+  &__section-hint {
+    font-size: 13px;
+    color: $text-secondary;
+    margin: 0 0 14px;
+  }
+
+  &__footer {
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    &--single {
+      justify-content: flex-end;
+    }
+  }
+}
+
+// Avatar picker 
+.avatar-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+
+  &__preview {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: $bg-avatar;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid $border-card;
+    flex-shrink: 0;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__placeholder {
+    color: $primary;
+    opacity: 0.7;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &__url-row {
+    display: flex;
+  }
+
+  &__url-input {
+    width: 100%;
+    height: 36px;
+    border: 1px solid $border-input;
+    border-radius: $border-radius-input;
+    padding: 0 12px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    background: $bg-card;
+    color: $text-primary;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.1);
+    }
+
+    &::placeholder {
+      color: $text-placeholder;
+    }
+  }
+}
+
+@media (min-width: 480px) {
+  .avatar-picker {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+
+    &__actions {
+      justify-content: flex-start;
+    }
+  }
+}
+
+// Genres grid
+.genre-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.genre-chip {
+  padding: 7px 14px;
+  border-radius: $border-radius-pill;
+  border: 1.5px solid $border-input;
+  background: $bg-card;
+  color: $text-label;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: $primary;
+    color: $primary;
+    background: $primary-light;
+  }
+
+  &--selected {
+    background: $primary;
+    border-color: $primary;
+    color: #FFFFFF;
+
+    &:hover {
+      background: $primary-hover;
+      border-color: $primary-hover;
+      color: #FFFFFF;
+    }
+  }
+}
+
+// ── Form fields 
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+
+  &__label {
+    font-size: 14px;
+    font-weight: 500;
+    color: $text-label;
+  }
+
+  &__icon-wrapper {
+    position: relative;
+  }
+
+  &__icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $text-placeholder;
+    pointer-events: none;
+  }
+
+  &__input {
+    height: 48px;
+    border: 1px solid $border-input;
+    border-radius: $border-radius-input;
+    padding: 0 16px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    background: $bg-card;
+    color: $text-primary;
+
+    &--with-icon {
+      padding-left: 44px;
+    }
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.1);
+    }
+
+    &--error {
+      border-color: $error;
+    }
+
+    &::placeholder {
+      color: $text-placeholder;
+    }
+  }
+
+  &__textarea {
+    border: 1px solid $border-input;
+    border-radius: $border-radius-input;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    background: $bg-card;
+    color: $text-primary;
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.1);
+    }
+
+    &--error {
+      border-color: $error;
+    }
+
+    &::placeholder {
+      color: $text-placeholder;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 18px;
+  }
+
+  &__error {
+    font-size: 12px;
+    color: $error;
+  }
+
+  &__counter {
+    font-size: 12px;
+    color: $text-placeholder;
+    margin-left: auto;
+  }
+}
+
+// Buttons 
+.btn-primary {
+  height: 44px;
+  padding: 0 24px;
+  background: $primary;
+  color: #FFFFFF;
+  border: none;
+  border-radius: $border-radius-btn;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s;
+
+  &:hover:not(:disabled) {
+    background: $primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+  height: 38px;
+  padding: 0 16px;
+  background: $bg-card;
+  color: $text-label;
+  border: 1.5px solid $border-input;
+  border-radius: $border-radius-btn;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: $primary;
+    color: $primary;
+  }
+}
+
+.btn-ghost {
+  height: 38px;
+  padding: 0 16px;
+  background: transparent;
+  color: $text-secondary;
+  border: none;
+  border-radius: $border-radius-btn;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover {
+    background: $bg-tag;
+  }
+
+  &--danger {
+    color: $error;
+
+    &:hover {
+      background: #FEF2F2;
+    }
+  }
+}
+
+.song-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.song-preview {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #6B7280;
+  font-style: italic;
+
+  svg { flex-shrink: 0; color: #9CA3AF; }
+}

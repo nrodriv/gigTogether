@@ -1,0 +1,200 @@
+<div class="detail-page">
+
+  @if (isLoading) {
+    <div class="detail-page__loading">
+      <mat-spinner diameter="48" />
+    </div>
+
+  } @else if (concert) {
+    <div class="detail-page__inner">
+
+      <!-- COLUMNA IZQUIERDA -->
+      <div class="detail-page__left">
+        <a routerLink="/conciertos" class="detail-page__back">
+          ← Volver a conciertos
+        </a>
+
+        <img [src]="concert.imageUrl || 'https://picsum.photos/seed/default/800/450'"
+             [alt]="concert.artistName"
+             class="detail-page__hero-img" />
+
+        <h1 class="detail-page__artist">{{ concert.artistName }}</h1>
+
+        @if (concert.genre) {
+          <span class="detail-page__genre-tag">{{ concert.genre }}</span>
+        }
+
+        <div class="detail-page__info">
+          <div class="detail-page__info-row">
+            <span class="detail-page__info-label">Fecha</span>
+            <span class="detail-page__info-value">
+              {{ concert.date | date:'EEEE d MMMM yyyy':'':'es-ES' }}
+              · {{ concert.doorsOpenTime }}h
+            </span>
+          </div>
+          <div class="detail-page__info-row">
+            <span class="detail-page__info-label">Sala</span>
+            <div>
+              <span class="detail-page__info-value detail-page__info-value--bold">
+                {{ concert.venue.name }}
+              </span>
+              <span class="detail-page__info-address">
+                {{ concert.venue.address }}
+              </span>
+            </div>
+          </div>
+          @if (concert.venue.meetingPoints?.length) {
+            <div class="detail-page__info-row">
+              <span class="detail-page__info-label">Puntos de encuentro</span>
+              <ul class="detail-page__meeting-list">
+                @for (mp of concert.venue.meetingPoints; track mp.id) {
+                  <li>· {{ mp.name }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+
+        @if (concert.soloCount) {
+          <p class="detail-page__solo-count">
+            {{ concert.soloCount }} personas van solas a este concierto
+          </p>
+        }
+
+      </div>
+
+      <!-- COLUMNA DERECHA -->
+      <div class="detail-page__right">
+
+        @if (isPast) {
+          <div class="detail-page__past-banner" role="status">
+            <span class="detail-page__past-banner-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                   stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </span>
+            <div>
+              <p class="detail-page__past-banner-title">Este concierto ya se ha celebrado</p>
+              <p class="detail-page__past-banner-desc">
+                Puedes consultar tu historial en
+                <a routerLink="/mis-grupos" class="detail-page__past-banner-link">Mis grupos</a>.
+              </p>
+            </div>
+          </div>
+
+        } @else if (isBanned) {
+          <!-- BANNER: expulsado del concierto -->
+          <div class="detail-page__ban-banner" role="alert">
+            <span class="detail-page__ban-banner-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                   stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </span>
+            <div>
+              <p class="detail-page__ban-banner-title">No puedes unirte a este concierto</p>
+              <p class="detail-page__ban-banner-desc">
+                Fuiste expulsado de un grupo de este concierto por comportamiento inapropiado.
+              </p>
+            </div>
+          </div>
+
+        } @else if (alreadyInGroup) {
+          <!-- BANNER: ya en un grupo -->
+          <div class="detail-page__group-banner" role="status">
+            <span class="detail-page__group-banner-icon">✓</span>
+            <div>
+              <p class="detail-page__group-banner-title">Ya estás en un grupo para este concierto</p>
+              <a routerLink="/mis-grupos" class="detail-page__group-banner-link">
+                Ver mi grupo →
+              </a>
+            </div>
+          </div>
+
+        } @else {
+          <!-- PANEL CONFIGURA TU PREVIA -->
+          <div class="previa-card">
+            <h2 class="previa-card__title">Configura tu previa</h2>
+            <p class="previa-card__subtitle">
+              Elige cómo quieres organizarte antes del concierto
+            </p>
+
+            <!-- PUNTO DE ENCUENTRO -->
+            <div class="previa-section">
+              <p class="previa-section__label">Punto de encuentro</p>
+              <div class="previa-section__options">
+                @for (mp of concert.venue.meetingPoints; track mp.id) {
+                  <button class="option-item"
+                          [class.option-item--selected]="selectedMeetingPointId === mp.id"
+                          (click)="selectedMeetingPointId = mp.id"
+                          [attr.aria-pressed]="selectedMeetingPointId === mp.id"
+                          type="button">
+                    {{ mp.name }}
+                    @if (mp.description) {
+                      <span class="option-item__desc"> - {{ mp.description }}</span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- FRANJA DE LLEGADA -->
+            <div class="previa-section">
+              <p class="previa-section__label">Franja de llegada</p>
+              <div class="previa-section__pills">
+                @for (win of arrivalWindows; track win.value + win.label) {
+                  <button class="arrival-pill"
+                          [class.arrival-pill--selected]="selectedArrivalWindow === win.value && selectedArrivalLabel === win.label"
+                          (click)="selectedArrivalWindow = win.value; selectedArrivalLabel = win.label"
+                          [attr.aria-pressed]="selectedArrivalWindow === win.value && selectedArrivalLabel === win.label"
+                          type="button">
+                    {{ win.label }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- QUÉ TE APETECE -->
+            <div class="previa-section">
+              <p class="previa-section__label">¿Qué te apetece?</p>
+              <div class="previa-section__options">
+                @for (act of activities; track act.value) {
+                  <button class="option-item"
+                          [class.option-item--selected]="selectedActivity === act.value"
+                          (click)="selectedActivity = act.value"
+                          [attr.aria-pressed]="selectedActivity === act.value"
+                          type="button">
+                    {{ act.label }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            @if (joinError) {
+              <p class="previa-card__error" role="alert">{{ joinError }}</p>
+            }
+
+            <!-- BOTÓN DESKTOP -->
+            <button class="btn-primary previa-card__cta"
+                    (click)="onJoin()"
+                    [disabled]="joinLoading || !isFormComplete"
+                    [attr.aria-busy]="joinLoading">
+              @if (joinLoading) {
+                <mat-spinner diameter="20" />
+              } @else {
+                Voy solo/a
+              }
+            </button>
+          </div>
+        }
+
+      </div>
+    </div>
+  }
+</div>

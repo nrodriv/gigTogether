@@ -1,0 +1,19 @@
+@if (!isAuthRoute()) {
+  <nav class="bottom-tab-bar" *ngIf="isAuthenticated$ | async" role="navigation" aria-label="Navegación principal">
+    <a class="bottom-tab-bar__tab" routerLink="/inicio" routerLinkActive="bottom-tab-bar__tab--active" ariaCurrentWhenActive="page">
+      <mat-icon>home</mat-icon>
+      <span>Inicio</span>
+      <span class="bottom-tab-bar__indicator" aria-hidden="true"></span>
+    </a>
+    <a class="bottom-tab-bar__tab" routerLink="/conciertos" routerLinkActive="bottom-tab-bar__tab--active" ariaCurrentWhenActive="page">
+      <mat-icon>music_note</mat-icon>
+      <span>Conciertos</span>
+      <span class="bottom-tab-bar__indicator" aria-hidden="true"></span>
+    </a>
+    <a class="bottom-tab-bar__tab" routerLink="/mis-grupos" routerLinkActive="bottom-tab-bar__tab--active" ariaCurrentWhenActive="page">
+      <mat-icon>group</mat-icon>
+      <span>Mis grupos</span>
+      <span class="bottom-tab-bar__indicator" aria-hidden="true"></span>
+    </a>
+  </nav>
+}

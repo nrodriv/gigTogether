@@ -1,0 +1,33 @@
+<div class="home-page">
+  <div class="home-page__inner">
+
+    @if (currentUser$ | async; as user) {
+      <div class="home-page__header">
+        <div class="home-page__greeting-row">
+          <h1 class="home-page__greeting">Hola, {{ user.alias }}</h1>
+          <span class="home-page__city-chip">Madrid</span>
+        </div>
+      </div>
+    }
+
+    <section class="home-page__section">
+      <div class="home-page__section-header">
+        <h2 class="home-page__section-title">Conciertos sugeridos para ti</h2>
+        <a routerLink="/conciertos" class="home-page__see-all">Ver todos →</a>
+      </div>
+
+      @if (isLoading) {
+        <div class="home-page__loading" aria-live="polite" aria-label="Cargando conciertos">
+          <mat-spinner diameter="40" />
+        </div>
+      } @else {
+        <div class="home-page__grid">
+          @for (concert of concerts; track concert.id) {
+            <app-concert-card [concert]="concert" variant="vertical" />
+          }
+        </div>
+      }
+    </section>
+
+  </div>
+</div>

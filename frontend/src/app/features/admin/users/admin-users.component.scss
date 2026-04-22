@@ -1,0 +1,133 @@
+@use '../admin-shared' as *;
+
+.admin-users { font-family: 'Inter', sans-serif; }
+
+
+.users-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  align-items: flex-end;
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+}
+
+.users-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+
+  @media (max-width: 767px) { min-width: 0; }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  &__icon {
+    position: absolute;
+    left: 8px;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 8px 28px 8px 30px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    color: #111827;
+    background: #fff;
+    outline: none;
+    &:focus { border-color: #3B5BDB; box-shadow: 0 0 0 2px #EEF2FF; }
+  }
+
+  &__clear {
+    position: absolute;
+    right: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9CA3AF;
+    font-size: 12px;
+    padding: 2px 4px;
+    &:hover { color: #374151; }
+  }
+}
+
+.users-count {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0 0 12px;
+}
+
+
+.user-alias-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #EEF2FF;
+    color: #3B5BDB;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__name { font-weight: 500; color: #111827; }
+}
+
+.active-chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  &--active   { background: #DCFCE7; color: #16A34A; }
+  &--inactive { background: #FEE2E2; color: #DC2626; }
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #374151;
+  background: #F3F4F6;
+  padding: 2px 8px;
+  border-radius: 6px;
+  mat-icon { font-size: 13px; width: 13px; height: 13px; color: #9CA3AF; }
+}
+
+
+@media (max-width: 767px) {
+  .mat-column-email,
+  .mat-column-joined {
+    display: none;
+  }
+}

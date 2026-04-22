@@ -1,0 +1,66 @@
+@use '../../../../styles/variables' as *;
+
+.profile-shell {
+  min-height: calc(100vh - #{$navbar-height});
+  background: $bg-page;
+  padding: 32px 16px 48px;
+
+  &__inner {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  &__content {
+    background: $bg-card;
+    border-radius: $border-radius-card;
+    border: 1px solid $border-card;
+    overflow: hidden;
+  }
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 4px;
+  background: $bg-card;
+  border-radius: $border-radius-card;
+  border: 1px solid $border-card;
+  padding: 6px;
+  margin-bottom: 12px;
+
+  &__tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    color: $text-secondary;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      background: $bg-tag;
+      color: $primary;
+    }
+
+    &--active {
+      background: $primary;
+      color: #FFFFFF;
+
+      &:hover {
+        background: $primary-hover;
+        color: #FFFFFF;
+      }
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .profile-shell {
+    padding: 40px 24px 64px;
+  }
+}

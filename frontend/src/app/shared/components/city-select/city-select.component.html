@@ -1,0 +1,50 @@
+<div class="city-select" [class.city-select--open]="isOpen">
+  <button
+    class="city-select__trigger"
+    type="button"
+    (click)="toggleDropdown()"
+    [attr.aria-expanded]="isOpen"
+    aria-haspopup="listbox">
+    <span class="city-select__label">{{ selectedCity?.name ?? 'Todas las ciudades' }}</span>
+    <svg class="city-select__chevron" width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  @if (isOpen) {
+    <div class="city-select__dropdown" role="dialog" aria-label="Seleccionar ciudad">
+      <input
+        class="city-select__search"
+        type="text"
+        placeholder="Buscar ciudad..."
+        [value]="searchText"
+        (input)="searchText = $any($event.target).value"
+        aria-label="Buscar ciudad"
+        autofocus
+      />
+      <ul class="city-select__list" role="listbox">
+        <li
+          class="city-select__option"
+          [class.city-select__option--active]="selectedCity === null"
+          (click)="select(null)"
+          role="option">
+          Todas las ciudades
+        </li>
+        @for (city of filteredCities; track city.id) {
+          <li
+            class="city-select__option"
+            [class.city-select__option--active]="selectedCity?.id === city.id"
+            (click)="select(city)"
+            role="option">
+            {{ city.name }}
+          </li>
+        }
+        @if (filteredCities.length === 0) {
+          <li class="city-select__option city-select__option--empty">
+            {{ loading ? 'Cargando...' : 'Sin resultados' }}
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>

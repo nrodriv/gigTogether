@@ -1,0 +1,66 @@
+<div class="profile-card-overlay" (click)="onBackdropClick($event)" role="dialog" aria-modal="true" [attr.aria-label]="'Perfil de ' + profile.alias">
+
+  <div class="profile-card">
+
+    <button class="profile-card__close" (click)="close.emit()" aria-label="Cerrar perfil">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+           stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <!-- Cabecera -->
+    <div class="profile-card__header">
+      <div class="profile-card__avatar">
+        @if (profile.profilePicture) {
+          <img [src]="profile.profilePicture" [alt]="profile.alias" class="profile-card__avatar-img" />
+        } @else {
+          <span class="profile-card__avatar-initials">
+            {{ profile.alias | slice:0:2 | uppercase }}
+          </span>
+        }
+      </div>
+      <div class="profile-card__identity">
+        <h2 class="profile-card__alias">{{ profile.alias }}</h2>
+        @if (profile.currentSong) {
+          <div class="profile-card__song">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 18V5l12-2v13"/>
+              <circle cx="6" cy="18" r="3"/>
+              <circle cx="18" cy="16" r="3"/>
+            </svg>
+            <span>{{ profile.currentSong }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Bio -->
+    @if (profile.bio) {
+      <p class="profile-card__bio">{{ profile.bio }}</p>
+    }
+
+    <!-- Géneros -->
+    @if (profile.musicGenres && profile.musicGenres.length > 0) {
+      <div class="profile-card__genres">
+        <p class="profile-card__genres-label">Géneros favoritos</p>
+        <div class="profile-card__genre-list">
+          @for (genre of profile.musicGenres; track genre) {
+            <span class="profile-card__genre-chip">{{ genre }}</span>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Estado vacío -->
+    @if (!profile.bio && (!profile.musicGenres || profile.musicGenres.length === 0) && !profile.currentSong) {
+      <p class="profile-card__empty">Este usuario todavía no ha completado su perfil.</p>
+    }
+
+  </div>
+
+</div>

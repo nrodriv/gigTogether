@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Block" ADD COLUMN "groupId" TEXT;
+ALTER TABLE "Block" ADD CONSTRAINT "Block_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AlterTable
+ALTER TABLE "Report" ADD COLUMN "groupId" TEXT;
+ALTER TABLE "Report" ADD CONSTRAINT "Report_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE SET NULL ON UPDATE CASCADE;

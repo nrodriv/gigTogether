@@ -1,0 +1,66 @@
+<div class="home-page">
+  <div class="home-page__content">
+
+    <!-- Cabecera: saludo + selector de ciudad -->
+    <header class="home-page__header">
+      <div class="home-page__greeting-row">
+        @if (currentUser$ | async; as user) {
+          <h1 class="home-page__greeting">Hola, {{ user.alias }}</h1>
+        } @else {
+          <h1 class="home-page__greeting">Bienvenido/a</h1>
+        }
+        <app-city-select
+          [cities]="cities"
+          [selectedCity]="selectedCity()"
+          [loading]="citiesLoading"
+          (cityChange)="onCityChange($event)"
+          aria-label="Seleccionar ciudad" />
+      </div>
+    </header>
+
+    <!-- Sección conciertos sugeridos -->
+    <section class="home-page__section" aria-labelledby="suggested-heading">
+      <div class="home-page__section-header">
+        <h2 id="suggested-heading" class="home-page__section-title">
+          Conciertos sugeridos para ti
+        </h2>
+        <button
+          class="home-page__see-all"
+          (click)="goToAllConcerts()"
+          aria-label="Ver todos los conciertos">
+          Ver todos →
+        </button>
+      </div>
+
+      @if (concerts$ | async; as concerts) {
+        <!-- Desktop: grid 3 columnas -->
+        <div class="home-page__grid" role="list">
+          @for (concert of concerts | slice:0:5; track concert.id) {
+            <div role="listitem">
+              <app-concert-card
+                [concert]="concert"
+                layout="grid"
+                class="home-page__grid-card" />
+            </div>
+          }
+        </div>
+
+        <!-- Móvil: lista 1 columna -->
+        <div class="home-page__list" role="list">
+          @for (concert of concerts | slice:0:5; track concert.id) {
+            <div role="listitem">
+              <app-concert-card
+                [concert]="concert"
+                layout="list" />
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="home-page__loading" aria-live="polite" aria-busy="true">
+          <mat-spinner diameter="36" />
+        </div>
+      }
+    </section>
+
+  </div>
+</div>
