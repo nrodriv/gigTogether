@@ -4,7 +4,7 @@ import { Pool } from 'pg';
 import * as bcrypt from 'bcryptjs';
 import * as dotenv from 'dotenv';
 
-dotenv.config({ override: true });
+dotenv.config();
 
 const url = process.env.DATABASE_URL ?? '';
 const isRemote = !url.includes('localhost') && !url.includes('127.0.0.1');
