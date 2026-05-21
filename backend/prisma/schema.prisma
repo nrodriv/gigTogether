@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  passwordHash    String
+  alias           String
+  bio             String?
+  profilePicture  String?
+  currentSong     String?
+  musicGenres     String[]       @default([])
+  role            Role           @default(USER)
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  preferences     Preference?
+  groupMembers    GroupMember[]
+  blocksGiven     Block[]        @relation("blocker")
+  blocksReceived  Block[]        @relation("blocked")
+  reportsGiven    Report[]       @relation("reporter")
+  reportsReceived Report[]       @relation("reported")
+  notifications   Notification[]
+  concertBans     ConcertBan[]
+  chatMessages    ChatMessage[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model City {
+  id     String  @id @default(uuid())
+  name   String
+  slug   String  @unique
+  venues Venue[]
+}
+
+model Venue {
+  id            String         @id @default(uuid())
+  name          String
+  address       String
+  cityId        String
+  city          City           @relation(fields: [cityId], references: [id])
+  meetingPoints MeetingPoint[]
+  concerts      Concert[]
+}
+
+model MeetingPoint {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  venueId     String
+  venue       Venue   @relation(fields: [venueId], references: [id])
+  groups      Group[]
+}
+
+model Concert {
+  id            String       @id @default(uuid())
+  title         String
+  artistName    String
+  genre         String?
+  venueId       String
+  venue         Venue        @relation(fields: [venueId], references: [id])
+  date          DateTime
+  doorsOpenTime String
+  imageUrl      String?
+  isPublished   Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  groups        Group[]
+  concertBans   ConcertBan[]
+}
+
+model Preference {
+  id            String        @id @default(uuid())
+  userId        String        @unique
+  user          User          @relation(fields: [userId], references: [id])
+  arrivalWindow ArrivalWindow @default(ON_TIME)
+  activityType  ActivityType  @default(NO_PREFERENCE)
+  notes         String?
+}
+
+enum ArrivalWindow {
+  EARLY
+  ON_TIME
+  LATE
+}
+
+enum ActivityType {
+  HAVE_DRINK
+  GET_GOOD_SPOT
+  CHAT
+  NO_PREFERENCE
+}
+
+model Group {
+  id             String        @id @default(uuid())
+  concertId      String
+  concert        Concert       @relation(fields: [concertId], references: [id])
+  meetingPointId String
+  meetingPoint   MeetingPoint  @relation(fields: [meetingPointId], references: [id])
+  arrivalWindow  ArrivalWindow
+  activityType   ActivityType  @default(NO_PREFERENCE)
+  maxSize        Int           @default(5)
+  status         GroupStatus   @default(OPEN)
+  chatUnlocked   Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  members        GroupMember[]
+  blocks         Block[]
+  reports        Report[]
+  messages       ChatMessage[]
+}
+
+enum GroupStatus {
+  OPEN
+  FULL
+  CLOSED
+}
+
+model GroupMember {
+  id           String       @id @default(uuid())
+  groupId      String
+  group        Group        @relation(fields: [groupId], references: [id])
+  userId       String
+  user         User         @relation(fields: [userId], references: [id])
+  status       MemberStatus @default(ACCEPTED)
+  isOwner      Boolean      @default(false)
+  activityType ActivityType @default(NO_PREFERENCE)
+  joinedAt     DateTime     @default(now())
+
+  @@unique([groupId, userId])
+}
+
+enum MemberStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Block {
+  id        String   @id @default(uuid())
+  blockerId String
+  blocker   User     @relation("blocker", fields: [blockerId], references: [id])
+  blockedId String
+  blocked   User     @relation("blocked", fields: [blockedId], references: [id])
+  groupId   String?
+  group     Group?   @relation(fields: [groupId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  reporterId String
+  reporter   User     @relation("reporter", fields: [reporterId], references: [id])
+  reportedId String
+  reported   User     @relation("reported", fields: [reportedId], references: [id])
+  reason     String
+  details    String?
+  isRead     Boolean  @default(false)
+  groupId    String?
+  group      Group?   @relation(fields: [groupId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  message   String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}
+
+enum NotificationType {
+  EXPULSION
+  GROUP_MESSAGE
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model ConcertBan {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  concertId String
+  concert   Concert  @relation(fields: [concertId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, concertId])
+}

@@ -1,0 +1,59 @@
+<div class="concerts-page">
+  <div class="concerts-page__inner">
+
+    <div class="concerts-page__header">
+      <div class="concerts-page__title-row">
+        <h1 class="concerts-page__title">Próximos conciertos</h1>
+        <app-city-select
+          [cities]="cities"
+          [selectedCity]="selectedCity"
+          [loading]="citiesLoading"
+          (cityChange)="onCityChange($event)" />
+      </div>
+      <p class="concerts-page__subtitle">{{ subtitleText }}</p>
+    </div>
+
+    <div class="concerts-page__search-wrapper">
+      <div class="search-input">
+        <svg class="search-input__icon" width="18" height="18" viewBox="0 0 24 24"
+             fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search" class="search-input__field"
+               placeholder="Buscar artista, sala..."
+               [value]="searchQuery"
+               (input)="onSearch($any($event.target).value)"
+               aria-label="Buscar conciertos" />
+      </div>
+    </div>
+
+    <div class="concerts-page__filters" role="group" aria-label="Filtrar por género">
+      @for (genre of genres; track genre; let i = $index) {
+        <button class="filter-chip"
+                [class.filter-chip--active]="activeGenre === genre"
+                [class.filter-chip--mobile-hidden]="i > 4"
+                (click)="onGenreFilter(genre)"
+                [attr.aria-pressed]="activeGenre === genre">
+          {{ genre }}
+        </button>
+      }
+    </div>
+
+    @if (isLoading) {
+      <div class="concerts-page__loading" aria-live="polite">
+        <mat-spinner diameter="40" />
+      </div>
+    } @else if (filteredConcerts.length === 0) {
+      <div class="concerts-page__empty">
+        <p>No hay conciertos que coincidan con tu búsqueda.</p>
+      </div>
+    } @else {
+      <div class="concerts-page__grid">
+        @for (concert of filteredConcerts; track concert.id) {
+          <app-concert-card [concert]="concert" [layout]="isMobile ? 'list' : 'grid'" />
+        }
+      </div>
+    }
+
+  </div>
+</div>

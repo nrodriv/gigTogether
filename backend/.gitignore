@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.env.production
+prisma/seed.ts
+prisma/seed.admin.ts
+prisma/seed.snapshot.sql
+prisma/seed.restore.ts
+prisma/restore-snapshot.ts
+*.tsbuildinfo
+
+/generated/prisma

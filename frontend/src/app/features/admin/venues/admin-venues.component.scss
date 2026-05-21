@@ -1,0 +1,14 @@
+@use '../admin-shared' as *;
+
+.admin-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin: 32px 0 16px;
+}
+
+.add-venue-section { margin-top: 8px; }
+
+@media (max-width: 767px) {
+  .mat-column-address { display: none; }
+}

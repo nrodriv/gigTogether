@@ -1,0 +1,9 @@
+@use '../admin-shared' as *;
+
+@media (max-width: 767px) {
+
+  .mat-column-venue,
+  .mat-column-date {
+    display: none;
+  }
+}

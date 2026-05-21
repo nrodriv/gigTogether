@@ -1,0 +1,10 @@
+.app-content {
+  min-height: calc(100vh - 56px);
+  background-color: #F0EFFA;
+}
+
+@media (max-width: 767px) {
+  .app-content {
+    padding-bottom: 56px;
+  }
+}
